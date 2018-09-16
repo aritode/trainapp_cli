@@ -2,10 +2,10 @@
 class Train
   attr_reader :speed, :number, :carriages, :type
 
-  def initialize(number, type = :cargo, carriages = 0)
+  def initialize(number, type = :cargo)
     @number = number
     @type = type if %i[cargo passenger].include?(type)
-    @carriages = carriages
+    @carriages = []
     @speed = 0
   end
 
@@ -17,12 +17,12 @@ class Train
     @speed = 0
   end
 
-  def add_carriage
-    @carriages += 1 if @speed.zero?
+  def add_carriage(carriage)
+    @carriages << carriage if @speed.zero?
   end
 
   def remove_carriage
-    @carriages -= 1 if @speed.zero? && carriages > 0
+    @carriages.pop if @speed.zero? && carriages.empty?
   end
 
   def route=(route)
@@ -54,7 +54,7 @@ class Train
   end
 
   def to_s
-    "Train N:#{number} Type:#{type} Carriages:#{carriages}"
+    "Train N:#{number} Type:#{type} Carriages:#{carriages.size}"
   end
 
   private

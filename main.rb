@@ -4,6 +4,10 @@ require_relative 'train'
 require_relative 'train/passenger_train'
 require_relative 'train/cargo_train'
 
+require_relative 'carriage'
+require_relative 'carriage/passenger_carriage'
+require_relative 'carriage/cargo_carriage'
+
 # Station Class
 
 station_one = Station.new('Saint-Petersburg')
@@ -29,9 +33,21 @@ puts route_one.stations
 
 # Train class
 
-train_one = PassengerTrain.new(11, 9)
+train_one = PassengerTrain.new(11)
 train_two = Train.new(15)
-train_three = CargoTrain.new(100, 20)
+train_three = CargoTrain.new(100)
+
+# Carriages
+
+cargo_car = CargoCarriage.new(22)
+cargo_car_two = CargoCarriage.new(44)
+passenger_car = PassengerCarriage.new(11)
+
+train_one.add_carriage(cargo_car) # testing
+train_one.add_carriage(passenger_car)
+train_three.add_carriage(cargo_car)
+train_three.add_carriage(passenger_car) # testing
+train_three.add_carriage(cargo_car_two)
 
 # Train class with Route
 
