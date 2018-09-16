@@ -1,6 +1,8 @@
 require_relative 'station'
 require_relative 'route'
 require_relative 'train'
+require_relative 'train/passenger_train'
+require_relative 'train/cargo_train'
 
 # Station Class
 
@@ -27,9 +29,9 @@ puts route_one.stations
 
 # Train class
 
-train_one = Train.new(11, :passenger, 9)
+train_one = PassengerTrain.new(11, 9)
 train_two = Train.new(15)
-train_three = Train.new(100, :cargo, 20)
+train_three = CargoTrain.new(100, 20)
 
 # Train class with Route
 
