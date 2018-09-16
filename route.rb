@@ -15,6 +15,6 @@ class Route
   end
 
   def to_s
-    "Route: #{stations.first} - #{stations.last}"
+    "#{stations.first} - #{stations.last}"
   end
 end

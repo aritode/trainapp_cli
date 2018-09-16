@@ -1,6 +1,6 @@
 # Train
 class Train
-  attr_reader :speed, :number, :carriages, :type
+  attr_reader :speed, :number, :carriages, :type, :route
 
   def initialize(number, type = :cargo)
     @number = number
@@ -22,7 +22,7 @@ class Train
   end
 
   def remove_carriage
-    @carriages.pop if @speed.zero? && carriages.empty?
+    @carriages.pop if @speed.zero? && !carriages.empty?
   end
 
   def route=(route)
