@@ -53,15 +53,17 @@ class Train
     @route.stations[@station_index - 1] if @station_index.positive?
   end
 
+  def to_s
+    "Train N:#{number} Type:#{type} Carriages:#{carriages}"
+  end
+
+  private
+
   def move_train(delta_index)
     accelerate
     current_station.release_train(self)
     @station_index += delta_index
     current_station.accept_train(self)
     stop
-  end
-
-  def to_s
-    "Train N:#{number} Type:#{type} Carriages:#{carriages}"
   end
 end
