@@ -5,11 +5,18 @@ class Train
   include ManufacturerName
   attr_reader :speed, :number, :carriages, :type, :route
 
+  @@trains = {}
+
+  def self.find(number)
+    @@trains[number]
+  end
+
   def initialize(number, type = :cargo)
     @number = number
     @type = type if %i[cargo passenger].include?(type)
     @carriages = []
     @speed = 0
+    @@trains[number] = self
   end
 
   def accelerate
