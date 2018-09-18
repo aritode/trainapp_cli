@@ -1,9 +1,13 @@
+require_relative 'modules/instance_counter'
+
 # Route
 class Route
+  include InstanceCounter
   attr_reader :stations
 
   def initialize(first_station, last_station)
     @stations = [first_station, last_station]
+    register_instance
   end
 
   def add(station)
