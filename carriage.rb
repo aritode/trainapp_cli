@@ -6,9 +6,17 @@ class Carriage
 
   def initialize(number)
     @number = number
+    validate!
   end
 
   def to_s
     "Carriage № #{@number}, type: #{self.class}"
+  end
+
+  protected
+
+  def validate!
+    raise 'Carriage number can\'t be empty' if @number.empty?
+    true
   end
 end

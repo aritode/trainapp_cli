@@ -7,6 +7,7 @@ class Route
 
   def initialize(first_station, last_station)
     @stations = [first_station, last_station]
+    validate!
     register_instance
   end
 
@@ -20,5 +21,18 @@ class Route
 
   def to_s
     "#{stations.first} - #{stations.last}"
+  end
+
+  private
+
+  def validate!
+    raise 'Incorrect First Station type' unless @stations.first.instance_of? Station
+    raise 'Incorrect Last Station type' unless @stations.last.instance_of? Station
+
+    if @stations.first == @stations.last
+      raise 'First Station must be different than Last Station'
+    end
+
+    true
   end
 end
