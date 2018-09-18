@@ -9,6 +9,8 @@ class Train
   include Validation
   attr_reader :speed, :number, :carriages, :type, :route
 
+  NUMBER_FORMAT = /^(\w{3})(-\w{2})?$/
+
   @@trains = {}
 
   def self.find(number)
@@ -77,6 +79,10 @@ class Train
 
   def validate!
     raise 'Train number can\'t be empty' if @number.empty?
+
+    if @number !~ NUMBER_FORMAT
+      raise 'Train number must be in correct format: ###-##'
+    end
 
     unless Train.find(@number).nil?
       raise "Train with №:#{@number} is already exist!"
