@@ -1,10 +1,12 @@
 require_relative 'modules/manufacturer_name'
 require_relative 'modules/instance_counter'
+require_relative 'modules/validation'
 
 # Train
 class Train
   include ManufacturerName
   include InstanceCounter
+  include Validation
   attr_reader :speed, :number, :carriages, :type, :route
 
   @@trains = {}
