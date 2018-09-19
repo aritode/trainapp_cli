@@ -91,8 +91,6 @@ class Train
     unless %i[cargo passenger].include?(@type)
       raise 'Train must be correct type: cargo or passenger'
     end
-
-    true
   end
 
   private

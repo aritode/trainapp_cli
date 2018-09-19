@@ -34,7 +34,5 @@ class Route
     if @stations.first == @stations.last
       raise 'First Station must be different than Last Station'
     end
-
-    true
   end
 end

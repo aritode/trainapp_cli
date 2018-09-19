@@ -45,7 +45,5 @@ class Station
     if Station.all.any? { |item| item.name.downcase == @name.downcase }
       raise "Station #{name} is already in Stations"
     end
-
-    true
   end
 end

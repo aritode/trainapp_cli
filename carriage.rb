@@ -19,6 +19,5 @@ class Carriage
 
   def validate!
     raise 'Carriage number can\'t be empty' if @number.empty?
-    true
   end
 end
