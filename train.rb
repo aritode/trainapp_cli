@@ -9,7 +9,7 @@ class Train
   include Validation
   attr_reader :speed, :number, :carriages, :type, :route
 
-  NUMBER_FORMAT = /^(\w{3})(-\w{2})?$/
+  NUMBER_FORMAT = /\A[A-Z|0-9]{3}-?[A-Z|0-9]{2}\z/i
 
   @@trains = {}
 
@@ -81,7 +81,7 @@ class Train
     raise 'Train number can\'t be empty' if @number.empty?
 
     if @number !~ NUMBER_FORMAT
-      raise 'Train number must be in correct format: ###-##'
+      raise 'Train number must be in correct format: ###-## or #####'
     end
 
     unless Train.find(@number).nil?
