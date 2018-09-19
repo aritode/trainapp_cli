@@ -88,7 +88,7 @@ class Train
       raise "Train with №:#{@number} is already exist!"
     end
 
-    if %i[cargo passenger].include?(@type)
+    unless %i[cargo passenger].include?(@type)
       raise 'Train must be correct type: cargo or passenger'
     end
 
