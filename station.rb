@@ -1,8 +1,10 @@
 require_relative 'modules/instance_counter'
+require_relative 'modules/validation'
 
 # Station
 class Station
   include InstanceCounter
+  include Validation
   attr_reader :name, :trains
 
   @@stations = []
@@ -14,6 +16,7 @@ class Station
   def initialize(name)
     @name = name
     @trains = []
+    validate!
     @@stations << self
     register_instance
   end
@@ -32,5 +35,15 @@ class Station
 
   def to_s
     name
+  end
+
+  private
+
+  def validate!
+    raise 'Station name can\'t be empty' if @name.empty?
+
+    if Station.all.any? { |item| item.name.downcase == @name.downcase }
+      raise "Station #{name} is already in Stations"
+    end
   end
 end

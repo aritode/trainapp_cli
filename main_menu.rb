@@ -64,15 +64,11 @@ class MainMenu
 
   def create_station(title = '[CREATE] Please enter Station name to create:')
     user_input = characters_user_input(title)
-    double_entries = Station.all.select { |item| item.name.downcase == user_input.downcase }
-    if double_entries.empty?
-      station = Station.new(user_input)
-      puts "Station: #{station} created!"
-    else
-      puts "\nStation #{user_input} is already in Stations"
-      puts "Please, try another name for Station"
-      create_station
-    end
+    station = Station.new(user_input)
+    puts "\n[SUCCESS] Station: #{station} created!"
+  rescue StandardError => e
+    show_error_message(e)
+    retry
   end
 
   def create_train(title = '[CREATE] Please choose Train type:')
@@ -82,17 +78,13 @@ class MainMenu
 
     title = 'Please enter Train number:'
     user_input_number = characters_user_input(title)
-    user_train = Train.find(user_input_number)
 
-    if user_train.nil?
-      train = train_type.new(user_input_number)
-      @trains << train
-      puts "#{train} created!"
-    else
-      puts "#{user_train} is already exist!"
-      puts 'Please, try again'
-      create_train
-    end
+    train = train_type.new(user_input_number)
+    @trains << train
+    puts "\n[SUCCESS] #{train} created!"
+  rescue StandardError => e
+    show_error_message(e)
+    retry
   end
 
   def create_route
@@ -124,15 +116,15 @@ class MainMenu
     title = 'Please choose Route last Station:'
     user_input_last = ordered_list_user_input(title, Station.all)
 
-    if user_input_last == user_input_first
-      puts "\nLast Station can't be the same as First Station"
-      puts 'Please, try again'
-      create_route_core
-    else
-      route = Route.new(Station.all[user_input_first - 1], Station.all[user_input_last - 1])
-      @routes << route
-      puts "Route: #{route} created!"
-    end
+    first_station = Station.all[user_input_first - 1]
+    last_station = Station.all[user_input_last - 1]
+
+    route = Route.new(first_station, last_station)
+    @routes << route
+    puts "\n[SUCCESS] Route: #{route} created!"
+  rescue StandardError => e
+    show_error_message(e)
+    retry
   end
 
   def manage_stations_in_route
@@ -196,7 +188,7 @@ class MainMenu
       user_input_station = ordered_list_user_input(title, available_stations)
       user_station = available_stations[user_input_station - 1]
       route.add(user_station)
-      puts "Station: #{user_station} added to the Route: #{route}"
+      puts "\n[SUCCESS] Station: #{user_station} added to the Route: #{route}"
     end
   end
 
@@ -222,7 +214,7 @@ class MainMenu
       user_input_station = ordered_list_user_input(title, available_stations)
       user_station = available_stations[user_input_station - 1]
       route.remove(user_station)
-      puts "Station: #{user_station} removed from the Route: #{route}"
+      puts "\n[SUCCESS] Station: #{user_station} removed from the Route: #{route}"
     end
   end
 
@@ -307,8 +299,11 @@ class MainMenu
       end
 
       user_train.add_carriage(carriage)
-      puts "#{carriage} was added to #{user_train}"
+      puts "\n[SUCCESS] #{carriage} was added to #{user_train}"
     end
+  rescue StandardError => e
+    show_error_message(e)
+    retry
   end
 
   def remove_carriage_from_train
@@ -350,7 +345,7 @@ class MainMenu
         end
       else
         carriage = user_train.remove_carriage
-        puts "#{carriage} was removed from #{user_train}"
+        puts "\n[SUCCESS] #{carriage} was removed from #{user_train}"
       end
     end
   end
@@ -414,6 +409,11 @@ class MainMenu
         puts 'Empty'
       end
     end
+  end
+
+  def show_error_message(e)
+    puts "\n[ERROR] #{e}"
+    puts 'Please, try again'
   end
 
   def show_header(title)

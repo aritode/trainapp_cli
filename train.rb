@@ -1,11 +1,15 @@
 require_relative 'modules/manufacturer_name'
 require_relative 'modules/instance_counter'
+require_relative 'modules/validation'
 
 # Train
 class Train
   include ManufacturerName
   include InstanceCounter
+  include Validation
   attr_reader :speed, :number, :carriages, :type, :route
+
+  NUMBER_FORMAT = /\A[A-Z|0-9]{3}-?[A-Z|0-9]{2}\z/i
 
   @@trains = {}
 
@@ -15,9 +19,10 @@ class Train
 
   def initialize(number, type = :cargo)
     @number = number
-    @type = type if %i[cargo passenger].include?(type)
+    @type = type
     @carriages = []
     @speed = 0
+    validate!
     @@trains[number] = self
     register_instance
   end
@@ -68,6 +73,24 @@ class Train
 
   def to_s
     "Train N:#{number} Type:#{type} Carriages:#{carriages.size}"
+  end
+
+  protected
+
+  def validate!
+    raise 'Train number can\'t be empty' if @number.empty?
+
+    if @number !~ NUMBER_FORMAT
+      raise 'Train number must be in correct format: ###-## or #####'
+    end
+
+    unless Train.find(@number).nil?
+      raise "Train with №:#{@number} is already exist!"
+    end
+
+    unless %i[cargo passenger].include?(@type)
+      raise 'Train must be correct type: cargo or passenger'
+    end
   end
 
   private
