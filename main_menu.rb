@@ -411,7 +411,10 @@ class MainMenu
     Station.all.each do |station|
       puts "\nStation: #{station}"
       if station.trains.any?
-        station.trains.each { |train| puts train }
+        station.each_train do |train|
+          puts train
+          train.each_carriage { |carriage| puts carriage }
+        end
       else
         puts 'Empty'
       end

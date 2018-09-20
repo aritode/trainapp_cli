@@ -33,6 +33,10 @@ class Station
     trains.select { |train| train.type == type }
   end
 
+  def each_train
+    trains.each { |train| yield train } if block_given?
+  end
+
   def to_s
     name
   end
