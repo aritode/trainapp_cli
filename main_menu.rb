@@ -286,24 +286,31 @@ class MainMenu
       title = 'Please choose Train for adding Carriage:'
       user_input = ordered_list_user_input(title, @trains)
       user_train = @trains[user_input - 1]
-
-      title = 'Please enter Carriage number:'
-      user_input = characters_user_input(title)
-
-      if user_train.is_a? CargoTrain
-        carriage = CargoCarriage.new(user_input)
-      elsif user_train.is_a? PassengerTrain
-        carriage = PassengerCarriage.new(user_input)
-      else
-        puts "ERROR"
-      end
-
-      user_train.add_carriage(carriage)
-      puts "\n[SUCCESS] #{carriage} was added to #{user_train}"
+      add_carriage_to_train_core(user_train)
     end
   rescue StandardError => e
     show_error_message(e)
     retry
+  end
+
+  def add_carriage_to_train_core(train)
+    title = 'Please enter Carriage number:'
+    user_input = characters_user_input(title)
+
+    if train.is_a? CargoTrain
+      title = 'Please enter Cargo Carriage maximum volume:'
+      user_input_volume = characters_user_input(title).to_i
+      carriage = CargoCarriage.new(user_input, user_input_volume)
+    elsif train.is_a? PassengerTrain
+      title = 'Please enter Carriage maximum number of seats:'
+      user_input_volume = characters_user_input(title).to_i
+      carriage = PassengerCarriage.new(user_input, user_input_volume)
+    else
+      puts "ERROR"
+    end
+
+    train.add_carriage(carriage)
+    print "\n[SUCCESS] #{carriage} was added to #{train}\n"
   end
 
   def remove_carriage_from_train
