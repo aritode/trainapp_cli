@@ -1,27 +1,27 @@
 # Passenger Carriage
 class PassengerCarriage < Carriage
+  alias total_seats volume_max
+  alias reserved_seats volume_taken
+
+  alias seats_available available_volume
+
   def initialize(number, total_seats)
-    @total_seats = total_seats
-    @reserved_seats = 0
-    validate!
-    super(number)
+    super(number, total_seats)
   end
 
-  def take_seat
-    @reserved_seats += 1 if @reserved_seats < @total_seats
+  def take_volume
+    super(1)
   end
 
-  def seats_available
-    @total_seats - @reserved_seats
-  end
+  alias take_seat take_volume
 
   def to_s
-    "#{super} - SEATS Available: #{seats_available}, Reserved: #{@reserved_seats}"
+    "#{super} - SEATS Available: #{seats_available}, Reserved: #{reserved_seats}"
   end
 
   private
 
   def validate!
-    raise 'Maximum number of Seats must be greater than 0' if @total_seats.zero?
+    raise 'Maximum number of Seats must be greater than 0' if total_seats.zero?
   end
 end

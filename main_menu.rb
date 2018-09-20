@@ -449,7 +449,6 @@ class MainMenu
         title = 'Please choose Carriage:'
         user_input = ordered_list_user_input(title, user_train.carriages)
         user_carriage = user_train.carriages[user_input - 1]
-        puts user_carriage
 
         if user_carriage.is_a? CargoCarriage
           title = 'Please enter Volume to fill:'
@@ -457,14 +456,16 @@ class MainMenu
           if user_carriage.take_volume(user_input)
             puts "\n[SUCCESS] Volume #{user_input} is filled"
           else
-            puts 'There is no available volume'
+            puts "\n[ERROR] There is no enough available volume"
           end
+          puts user_carriage
         elsif user_carriage.is_a? PassengerCarriage
           if user_carriage.take_seat
             puts "\n[SUCCESS] Seat is taken"
           else
-            puts 'There is no available seats'
+            puts "\n[ERROR] There is no available seats"
           end
+          puts user_carriage
         else
           puts 'ERROR'
         end
