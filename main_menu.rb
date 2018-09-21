@@ -32,6 +32,7 @@ class MainMenu
         7. Remove Carriage from Train
         8. Move Train on the Route (Next/Previous)
         9. Show List of Stations and Trains on the Stations
+        10. Take Seat or Fill Volume in Carriage
         0. QUIT
     DISPLAY_MENU
     print '=> '
@@ -57,6 +58,8 @@ class MainMenu
       move_train_by_route
     when 9
       print_stations_and_trains
+    when 10
+      take_seat_volume_carriage
     else
       display_menu
     end
@@ -286,24 +289,31 @@ class MainMenu
       title = 'Please choose Train for adding Carriage:'
       user_input = ordered_list_user_input(title, @trains)
       user_train = @trains[user_input - 1]
-
-      title = 'Please enter Carriage number:'
-      user_input = characters_user_input(title)
-
-      if user_train.is_a? CargoTrain
-        carriage = CargoCarriage.new(user_input)
-      elsif user_train.is_a? PassengerTrain
-        carriage = PassengerCarriage.new(user_input)
-      else
-        puts "ERROR"
-      end
-
-      user_train.add_carriage(carriage)
-      puts "\n[SUCCESS] #{carriage} was added to #{user_train}"
+      add_carriage_to_train_core(user_train)
     end
   rescue StandardError => e
     show_error_message(e)
     retry
+  end
+
+  def add_carriage_to_train_core(train)
+    title = 'Please enter Carriage number:'
+    user_input = characters_user_input(title)
+
+    if train.is_a? CargoTrain
+      title = 'Please enter Cargo Carriage maximum volume:'
+      user_input_volume = characters_user_input(title).to_i
+      carriage = CargoCarriage.new(user_input, user_input_volume)
+    elsif train.is_a? PassengerTrain
+      title = 'Please enter Carriage maximum number of seats:'
+      user_input_volume = characters_user_input(title).to_i
+      carriage = PassengerCarriage.new(user_input, user_input_volume)
+    else
+      puts "ERROR"
+    end
+
+    train.add_carriage(carriage)
+    print "\n[SUCCESS] #{carriage} was added to #{train}\n"
   end
 
   def remove_carriage_from_train
@@ -404,9 +414,61 @@ class MainMenu
     Station.all.each do |station|
       puts "\nStation: #{station}"
       if station.trains.any?
-        station.trains.each { |train| puts train }
+        station.each_train do |train|
+          puts train
+          train.each_carriage { |carriage| puts carriage }
+        end
       else
         puts 'Empty'
+      end
+    end
+  end
+
+  def take_seat_volume_carriage
+    if @trains.empty?
+      puts 'You have no Trains. Please add Train and then Carriage'
+      add_carriage_to_train
+    else
+      title = 'Please choose Train:'
+      user_input = ordered_list_user_input(title, @trains)
+      user_train = @trains[user_input - 1]
+
+      if user_train.carriages.empty?
+        puts "\nThere is no Carriages in Train"
+        title = 'Do you want to create Carriage?'
+        custom_list = ['Yes, let\'s create Carriage',
+                       'No, let\'s go to Main Menu']
+        user_input = ordered_list_user_input(title, custom_list)
+        case user_input
+        when 1
+          add_carriage_to_train_core(user_train)
+        when 2
+          display_menu
+        end
+      else
+        title = 'Please choose Carriage:'
+        user_input = ordered_list_user_input(title, user_train.carriages)
+        user_carriage = user_train.carriages[user_input - 1]
+
+        if user_carriage.is_a? CargoCarriage
+          title = 'Please enter Volume to fill:'
+          user_input = characters_user_input(title).to_i
+          if user_carriage.take_volume(user_input)
+            puts "\n[SUCCESS] Volume #{user_input} is filled"
+          else
+            puts "\n[ERROR] There is no enough available volume"
+          end
+          puts user_carriage
+        elsif user_carriage.is_a? PassengerCarriage
+          if user_carriage.take_seat
+            puts "\n[SUCCESS] Seat is taken"
+          else
+            puts "\n[ERROR] There is no available seats"
+          end
+          puts user_carriage
+        else
+          puts 'ERROR'
+        end
       end
     end
   end
