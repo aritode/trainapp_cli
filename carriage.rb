@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative 'modules/manufacturer_name'
 require_relative 'modules/validation'
 
@@ -16,7 +18,7 @@ class Carriage
   end
 
   def take_volume(amount)
-    @volume_taken += amount if amount <= available_volume && amount > 0
+    @volume_taken += amount if amount <= available_volume && amount.positive?
   end
 
   def available_volume

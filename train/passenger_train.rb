@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Passenger Train
 class PassengerTrain < Train
   def initialize(number)

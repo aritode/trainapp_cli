@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Cargo Carriage
 class CargoCarriage < Carriage
   def initialize(number, volume_max)

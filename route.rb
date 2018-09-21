@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative 'modules/instance_counter'
 require_relative 'modules/validation'
 
@@ -30,9 +32,6 @@ class Route
   def validate!
     raise 'Incorrect First Station type' unless @stations.first.instance_of? Station
     raise 'Incorrect Last Station type' unless @stations.last.instance_of? Station
-
-    if @stations.first == @stations.last
-      raise 'First Station must be different than Last Station'
-    end
+    raise 'First Station must be different than Last Station' if @stations.first == @stations.last
   end
 end
