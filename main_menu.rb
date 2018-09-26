@@ -85,7 +85,8 @@ class MainMenu
 
   def create_train(title = '[CREATE] Please choose Train type:')
     train_type = ask_choose_train_type(title)
-    user_input_number = ask_train_number
+
+    user_input_number = ask_enter('Train number')
 
     train = train_type.new(user_input_number)
     @trains << train
@@ -101,11 +102,6 @@ class MainMenu
     types[user_input - 1]
   end
 
-  def ask_train_number
-    title = 'Please enter Train number:'
-    characters_user_input(title)
-  end
-
   #
   # Create Route
   # ============
@@ -116,14 +112,10 @@ class MainMenu
   def create_route
     return create_route_core unless Station.all.size < 2
 
-    show_for_action_you_need('new Route',
-                             '2 Stations',
-                             Station.all.count)
+    show_info_for_action('new Route')
+    show_info_you_need_at_least('2 Stations', Station.all.count)
 
-    user_input = ask_yes_no_to_create('Station')
-    return if user_input == 2
-
-    create_station
+    create_station_advanced
     create_route
   end
 
@@ -132,8 +124,8 @@ class MainMenu
   #
 
   def create_route_core
-    user_input_first = ask_input_choose_route_station('first')
-    user_input_last = ask_input_choose_route_station('last')
+    user_input_first = ask_choose('Route', 'first Station', Station.all)
+    user_input_last = ask_choose('Route', 'last Station', Station.all)
 
     route = Route.new(Station.all[user_input_first - 1],
                       Station.all[user_input_last - 1])
@@ -142,11 +134,6 @@ class MainMenu
   rescue StandardError => e
     show_error_message(e)
     retry
-  end
-
-  def ask_input_choose_route_station(name)
-    title = "Please choose Route #{name} Station:"
-    ordered_list_user_input(title, Station.all)
   end
 
   #
@@ -159,14 +146,9 @@ class MainMenu
   def manage_stations_in_route
     return manage_stations_in_route_core unless @routes.empty?
 
-    show_for_action_you_need('managing Stations in Routes',
-                             '1 Route',
-                             @routes.count)
+    show_info_for_action('managing Stations in Routes')
 
-    user_input = ask_yes_no_to_create('Route')
-    return if user_input == 2
-
-    create_route
+    create_route_advanced
     manage_stations_in_route
   end
 
@@ -175,26 +157,21 @@ class MainMenu
   #
 
   def manage_stations_in_route_core
-    user_input_route = ask_manage_stations_in_route
+    user_input_route = ask_choose('Route',
+                                  'where you want Add/Remove Stations',
+                                  @routes)
 
     user_route = @routes[user_input_route - 1]
-    user_input = ask_add_or_remove_station
+    user_input = ask_choose('', '', custom_route_manage_options)
 
     action_manage_stations_in_route_core(user_input, user_route)
   end
 
-  def ask_manage_stations_in_route
-    title = 'Please choose Route in which you want Add/Remove Stations'
-    ordered_list_user_input(title, @routes)
-  end
-
-  def ask_add_or_remove_station
-    title = 'Please choose action:'
-    options = ['Add station',
-               'Remove station',
-               'No, let\'s go Back',
-               'No, let\'s go to Main Menu']
-    ordered_list_user_input(title, options)
+  def custom_route_manage_options
+    ['Add station',
+     'Remove station',
+     'No, let\'s go Back',
+     'No, let\'s go to Main Menu']
   end
 
   def action_manage_stations_in_route_core(user_input, user_route)
@@ -205,6 +182,8 @@ class MainMenu
       remove_station_from_route(user_route)
     when 3
       manage_stations_in_route_core
+    else
+      choose_step
     end
   end
 
@@ -220,38 +199,22 @@ class MainMenu
 
     return add_station_to_route_core(available_stations, route) unless available_stations.empty?
 
-    show_no_available_stations('to Add to the Route')
+    show_info_for_action('adding Station to Route')
+    show_info_you_need_at_least('1 Station not assigned to Route', 0)
 
-    user_input = ask_yes_no_to_create('Station')
+    create_station_advanced
 
-    action_add_station_to_route(user_input, route)
-  end
-
-  def show_no_available_stations(description)
-    puts "\nThere is no available Stations #{description}"
-  end
-
-  def action_add_station_to_route(user_input, route)
-    case user_input
-    when 1
-      create_station
-      add_station_to_route(route)
-    when 2
-      display_menu
-    end
+    add_station_to_route(route)
   end
 
   def add_station_to_route_core(available_stations, route)
-    user_input_station = ask_add_station_to_route_core(available_stations)
+    user_input_station = ask_choose('Station',
+                                    'to Add to Route',
+                                    available_stations)
     user_station = available_stations[user_input_station - 1]
 
     route.add(user_station)
     puts "\n[SUCCESS] Station: #{user_station} added to the Route: #{route}"
-  end
-
-  def ask_add_station_to_route_core(available_stations)
-    title = 'Please choose Station to Add to Route'
-    ordered_list_user_input(title, available_stations)
   end
 
   #
@@ -262,7 +225,7 @@ class MainMenu
   #
 
   def remove_station_from_route(route)
-    available_stations = Station.all.select do |item|
+    available_stations = route.stations.select do |item|
       item != route.stations.first && item != route.stations.last
     end
 
@@ -270,32 +233,18 @@ class MainMenu
       return remove_station_from_route_core(available_stations, route)
     end
 
-    show_no_available_stations('which you can Remove from Route')
-    user_input = ask_add_station_to_route
+    show_info_for_action('removing Station from Route')
+    show_info_you_need_at_least('1 Station in Route', 0)
 
-    action_remove_station_from_route(user_input, route)
-  end
-
-  def ask_add_station_to_route
-    title = 'Do you want to add Station to Route?'
-    custom_list = ['Yes, let\'s Add Station',
-                   'No, let\'s go to Main Menu']
-    ordered_list_user_input(title, custom_list)
-  end
-
-  def action_remove_station_from_route(user_input, route)
-    case user_input
-    when 1
-      add_station_to_route(route)
-      manage_stations_in_route
-    when 2
-      display_menu
-    end
+    add_station_to_route_advanced(route)
+    manage_stations_in_route
   end
 
   def remove_station_from_route_core(available_stations, route)
-    title = 'Please choose Station to Remove from Route'
-    user_input_station = ordered_list_user_input(title, available_stations)
+    user_input_station = ask_choose('Station',
+                                    'to Remove from Route',
+                                    available_stations)
+
     user_station = available_stations[user_input_station - 1]
     route.remove(user_station)
     puts "\n[SUCCESS] Station: #{user_station} removed from the Route: #{route}"
@@ -309,33 +258,18 @@ class MainMenu
   #
 
   def assign_route_to_train
-    return create_1_train_to_assign_route_to_train if @trains.empty?
-    return create_1_route_to_assign_route_to_train if @routes.empty?
+    return assign_route_to_train_template('create_train') if @trains.empty?
+    return assign_route_to_train_template('create_route') if @routes.empty?
 
     assign_route_to_train_core
   end
 
-  def create_1_train_to_assign_route_to_train
-    show_for_action_you_need('assigning Route to Train',
-                             '1 Train',
-                             @trains.count)
+  def assign_route_to_train_template(choice)
+    show_info_for_action('assigning Route to Train')
 
-    user_input = ask_yes_no_to_create('Train')
-    return if user_input == 2
+    create_train_advanced if choice == 'create_train'
+    create_route_advanced if choice == 'create_route'
 
-    create_train
-    assign_route_to_train
-  end
-
-  def create_1_route_to_assign_route_to_train
-    show_for_action_you_need('assigning Route to Train',
-                             '1 Route',
-                             @routes.count)
-
-    user_input = ask_yes_no_to_create('Route')
-    return if user_input == 2
-
-    create_route
     assign_route_to_train
   end
 
@@ -344,24 +278,14 @@ class MainMenu
   #
 
   def assign_route_to_train_core
-    user_input = ask_choose_train_for_route
+    user_input = ask_choose('Train', 'for assigning Route', @trains)
     user_train = @trains[user_input - 1]
 
-    user_input = ask_choose_route_for_train
+    user_input = ask_choose('Route', 'for assignment to Train', @routes)
     user_route = @routes[user_input - 1]
 
     user_train.route = user_route
     puts "[SUCCESS] #{user_train} assigned to Route: #{user_route}"
-  end
-
-  def ask_choose_train_for_route
-    title = 'Please choose Train for assigning Route:'
-    ordered_list_user_input(title, @trains)
-  end
-
-  def ask_choose_route_for_train
-    title = 'Please choose Route for assignment to Train:'
-    ordered_list_user_input(title, @routes)
   end
 
   #
@@ -371,34 +295,17 @@ class MainMenu
   #
 
   def add_carriage_to_train
-    if @trains.empty?
-      create_1_train_to_add_carriage_to_train
-    else
-      user_input = ask_choose_train_for_adding_carriages
-      user_train = @trains[user_input - 1]
+    return add_carriage_to_train_advanced if @trains.empty?
 
-      add_carriage_to_train_core(user_train)
-    end
+    user_input = ask_choose('Train',
+                            'for adding Carriage',
+                            @trains)
+    user_train = @trains[user_input - 1]
+
+    add_carriage_to_train_core(user_train)
   rescue StandardError => e
     show_error_message(e)
     retry
-  end
-
-  def create_1_train_to_add_carriage_to_train
-    show_for_action_you_need('adding Carriage to Train',
-                             '1 Train',
-                             @trains.count)
-
-    user_input = ask_yes_no_to_create('Train')
-    return if user_input == 2
-
-    create_train
-    add_carriage_to_train
-  end
-
-  def ask_choose_train_for_adding_carriages
-    title = 'Please choose Train for adding Carriage:'
-    ordered_list_user_input(title, @trains)
   end
 
   #
@@ -406,7 +313,7 @@ class MainMenu
   #
 
   def add_carriage_to_train_core(train)
-    user_input = ask_enter_carriage_number
+    user_input = ask_enter('Carriage number')
 
     carriage = if train.is_a? CargoTrain
                  create_cargo_carriage(user_input)
@@ -420,28 +327,15 @@ class MainMenu
     print "\n[SUCCESS] #{carriage} was added to #{train}\n"
   end
 
-  def ask_enter_carriage_number
-    title = 'Please enter Carriage number:'
-    characters_user_input(title)
-  end
-
-  def ask_cargo_carriage_max_volume
-    title = 'Please enter Cargo Carriage maximum volume:'
-    characters_user_input(title).to_i
-  end
-
-  def ask_passenger_carriage_max_seats
-    title = 'Please enter Passenger Carriage maximum number of seats:'
-    characters_user_input(title).to_i
-  end
-
   def create_cargo_carriage(user_input)
-    user_input_volume = ask_cargo_carriage_max_volume
+    user_input_volume = ask_enter('Cargo Carriage maximum volume').to_i
+
     CargoCarriage.new(user_input, user_input_volume)
   end
 
   def create_passenger_carriage(user_input)
-    user_input_volume = ask_passenger_carriage_max_seats
+    user_input_volume = ask_enter('Passenger Carriage maximum number of seats').to_i
+
     PassengerCarriage.new(user_input, user_input_volume)
   end
 
@@ -452,45 +346,28 @@ class MainMenu
   #
 
   def remove_carriage_from_train
-    return create_1_train_for_removing_carriage_from_train if @trains.empty?
+    return remove_carriage_from_train_template('create_train') if @trains.empty?
 
-    user_input = ask_choose_train_to_remove_carriage
+    user_input = ask_choose('Train', 'to remove Carriage', @trains)
     user_train = @trains[user_input - 1]
 
     if user_train.carriages.empty?
-      return create_1_carriage_for_removing_carriage_from_train(user_train)
+      return remove_carriage_from_train_template('create_carriage', user_train)
     end
 
     carriage = user_train.remove_carriage
     puts "\n[SUCCESS] #{carriage} was removed from #{user_train}"
   end
 
-  def ask_choose_train_to_remove_carriage
-    title = 'Please choose Train to remove Carriage:'
-    ordered_list_user_input(title, @trains)
-  end
+  def remove_carriage_from_train_template(choice, user_train = '')
+    show_info_for_action('removing Carriage from Train')
 
-  def create_1_train_for_removing_carriage_from_train
-    show_for_action_you_need('removing Carriage from Train',
-                             '1 Train',
-                             @trains.count)
-
-    user_input = ask_yes_no_to_create('Train')
-    return if user_input == 2
-
-    create_train
-    remove_carriage_from_train
-  end
-
-  def create_1_carriage_for_removing_carriage_from_train(user_train)
-    show_for_action_you_need('removing Carriage from Train',
-                             '1 Carriage',
-                             user_train.carriages.count)
-
-    user_input = ask_yes_no_to_create('Carriage')
-    return if user_input == 2
-
-    add_carriage_to_train
+    if choice == 'create_train'
+      create_train_advanced
+      remove_carriage_from_train
+    elsif choice == 'create_carriage'
+      add_carriage_to_train_core_advanced(user_train)
+    end
   end
 
   #
@@ -504,7 +381,9 @@ class MainMenu
 
     available_trains_on_route = @trains.select(&:route)
 
-    user_input = ask_choose_train_on_route_to_move(available_trains_on_route)
+    user_input = ask_choose('Train',
+                            'on Route to move',
+                            available_trains_on_route)
     user_train = @trains[user_input - 1]
 
     show_current_station(user_train)
@@ -524,34 +403,23 @@ class MainMenu
   def move_train_on_user_input(user_input, user_train)
     case user_input
     when 1
-      move_train_next_station(user_train)
+      move_train_direction(:move_next, user_train)
     when 2
-      move_train_previous_station(user_train)
+      move_train_direction(:move_previous, user_train)
     end
   end
 
-  def move_train_next_station(user_train)
-    user_train.move_next
-    show_current_station(user_train)
-    move_train_by_route
-  end
-
-  def move_train_previous_station(user_train)
-    user_train.move_previous
+  def move_train_direction(move_direction, user_train)
+    user_train.send move_direction
     show_current_station(user_train)
     move_train_by_route
   end
 
   def action_no_trains_on_route
-    show_for_action_you_need('moving Train on the Route',
-                             '1 Train assigned to Route',
-                             0)
+    show_info_for_action('moving Train on the Route')
+    show_info_you_need_at_least('1 Train assigned to Route',
+                                0)
     assign_route_to_train
-  end
-
-  def ask_choose_train_on_route_to_move(available_trains_on_route)
-    title = 'Please choose Train on Route to move:'
-    ordered_list_user_input(title, available_trains_on_route)
   end
 
   def show_current_station(user_train)
@@ -620,46 +488,27 @@ class MainMenu
   #
 
   def take_seat_volume_carriage
-    if @trains.empty?
-      create_1_train_to_take_seat_volume_carriage
-    else
-      user_input = ask_choose_train
-      user_train = @trains[user_input - 1]
+    return take_seat_volume_carriage_template('create_train') if @trains.empty?
 
-      if user_train.carriages.empty?
-        create_1_carriage_to_take_seat_volume_carriage(user_train)
-      else
-        take_seat_volume_carriage_core(user_train)
-      end
+    user_input = ask_choose('Train', '', @trains)
+    user_train = @trains[user_input - 1]
+
+    if user_train.carriages.empty?
+      take_seat_volume_carriage_template('create_carriage', user_train)
+    else
+      take_seat_volume_carriage_core(user_train)
     end
   end
 
-  def create_1_train_to_take_seat_volume_carriage
-    show_for_action_you_need('filling volume (or taking seat)',
-                             '1 Train',
-                             @trains.count)
+  def take_seat_volume_carriage_template(choice, user_train = '')
+    show_info_for_action('filling volume (or taking seat)')
 
-    user_input = ask_yes_no_to_create('Train')
-    return if user_input == 2
-
-    create_train
-    take_seat_volume_carriage
-  end
-
-  def create_1_carriage_to_take_seat_volume_carriage(user_train)
-    show_for_action_you_need('filling volume (or taking seat)',
-                             '1 Carriage in Train',
-                             user_train.carriages.count)
-
-    user_input = ask_yes_no_to_create('Carriage')
-    return if user_input == 2
-
-    add_carriage_to_train_core(user_train)
-  end
-
-  def ask_choose_train
-    title = 'Please choose Train:'
-    ordered_list_user_input(title, @trains)
+    if choice == 'create_train'
+      create_train_advanced
+      take_seat_volume_carriage
+    elsif choice == 'create_carriage'
+      add_carriage_to_train_core_advanced(user_train)
+    end
   end
 
   #
@@ -667,11 +516,11 @@ class MainMenu
   #
 
   def take_seat_volume_carriage_core(user_train)
-    user_input = ask_choose_carriage(user_train)
+    user_input = ask_choose('Carriage', '', user_train.carriages)
     user_carriage = user_train.carriages[user_input - 1]
 
     if user_carriage.is_a? CargoCarriage
-      user_input = ask_volume_to_fill
+      user_input = ask_enter('Volume to fill').to_i
       show_filled_volume(user_input, user_carriage)
 
     elsif user_carriage.is_a? PassengerCarriage
@@ -680,16 +529,6 @@ class MainMenu
     else
       raise 'ERROR in Carriage Type'
     end
-  end
-
-  def ask_choose_carriage(user_train)
-    title = 'Please choose Carriage:'
-    ordered_list_user_input(title, user_train.carriages)
-  end
-
-  def ask_volume_to_fill
-    title = 'Please enter Volume to fill:'
-    characters_user_input(title).to_i
   end
 
   def show_filled_volume(user_input, user_carriage)
@@ -714,6 +553,65 @@ class MainMenu
   # Helper methods
   #
 
+  def create_train_advanced
+    show_info_you_need_at_least('1 Train', @trains.count)
+
+    user_input = ask_yes_no_to_action('Create Train')
+    return choose_step if user_input == 2
+
+    create_train
+  end
+
+  def create_station_advanced
+    user_input = ask_yes_no_to_action('Create Station')
+    return choose_step if user_input == 2
+
+    create_station
+  end
+
+  def create_route_advanced
+    show_info_you_need_at_least('1 Route', @routes.count)
+
+    user_input = ask_yes_no_to_action('Create Route')
+    return choose_step if user_input == 2
+
+    create_route
+  end
+
+  def add_station_to_route_advanced(route)
+    user_input = ask_yes_no_to_action('add Station to Route')
+    return choose_step if user_input == 2
+
+    add_station_to_route(route)
+  end
+
+  def add_carriage_to_train_advanced
+    show_info_for_action('adding Carriage to Train')
+
+    create_train_advanced
+
+    add_carriage_to_train
+  end
+
+  def add_carriage_to_train_core_advanced(user_train)
+    show_info_you_need_at_least('1 Carriage in Train',
+                                user_train.carriages.count)
+
+    user_input = ask_yes_no_to_action('Create Carriage')
+    return if user_input == 2
+
+    add_carriage_to_train_core(user_train)
+  end
+
+  def show_info_for_action(action_title)
+    puts "\n[INFO] For #{action_title}"
+  end
+
+  def show_info_you_need_at_least(item_name, item_counter)
+    puts "[INFO] You need at least #{item_name}"
+    puts "You have: #{item_counter}"
+  end
+
   def show_for_action_you_need(action_name, to_name, counter)
     puts "\n[INFO] For #{action_name} you need at least #{to_name}"
     puts "You have: #{counter}"
@@ -724,6 +622,23 @@ class MainMenu
     custom_list = ["Yes, let's create #{name}",
                    'No, let\'s go Back']
     ordered_list_user_input(title, custom_list)
+  end
+
+  def ask_yes_no_to_action(action_name)
+    title = "[NEW] Do you want to #{action_name}?"
+    custom_list = ["Yes, let's #{action_name}",
+                   'No, let\'s go Back']
+    ordered_list_user_input(title, custom_list)
+  end
+
+  def ask_choose(item_name, additional_info, item_obj)
+    title = "[NEW] Please choose #{item_name} #{additional_info}:"
+    ordered_list_user_input(title, item_obj)
+  end
+
+  def ask_enter(item_name)
+    title = "[NEW] Please enter #{item_name}:"
+    characters_user_input(title)
   end
 
   def show_error_message(error)
