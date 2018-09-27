@@ -1,0 +1,28 @@
+# Please keep AllCops, Bundler, Layout, Style, Metrics groups and then order cops
+# alphabetically
+#
+# References:
+#   * https://github.com/bbatsov/ruby-style-guide
+#   * https://rubocop.readthedocs.io/
+AllCops:
+  DisplayCopNames: true
+  DisplayStyleGuide: true
+  ExtraDetails: false
+  TargetRubyVersion: 2.5
+
+  StyleGuideCopsOnly: false
+
+Rails:
+  Enabled: false
+
+Metrics/LineLength:
+  Max: 100
+
+Metrics/ClassLength:
+  Enabled: false
+
+Documentation:
+  Enabled: false
+
+Style/ClassVars:
+  Enabled: false

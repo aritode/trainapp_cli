@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative 'modules/manufacturer_name'
 require_relative 'modules/instance_counter'
 require_relative 'modules/validation'
@@ -84,17 +86,13 @@ class Train
   def validate!
     raise 'Train number can\'t be empty' if @number.empty?
 
-    if @number !~ NUMBER_FORMAT
-      raise 'Train number must be in correct format: ###-## or #####'
-    end
+    message = 'Train number must be in correct format: ###-## or #####'
+    raise message unless NUMBER_FORMAT.match?(@number)
 
-    unless Train.find(@number).nil?
-      raise "Train with №:#{@number} is already exist!"
-    end
+    raise "Train with №:#{@number} is already exist!" unless Train.find(@number).nil?
 
-    unless %i[cargo passenger].include?(@type)
-      raise 'Train must be correct type: cargo or passenger'
-    end
+    message = 'Train must be correct type: cargo or passenger'
+    raise message unless %i[cargo passenger].include?(@type)
   end
 
   private

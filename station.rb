@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative 'modules/instance_counter'
 require_relative 'modules/validation'
 
@@ -46,8 +48,7 @@ class Station
   def validate!
     raise 'Station name can\'t be empty' if @name.empty?
 
-    if Station.all.any? { |item| item.name.downcase == @name.downcase }
-      raise "Station #{name} is already in Stations"
-    end
+    message = "Station #{name} is already in Stations"
+    raise message if Station.all.any? { |item| item.name.casecmp(@name).zero? }
   end
 end

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Passenger Carriage
 class PassengerCarriage < Carriage
   alias total_seats volume_max

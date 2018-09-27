@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Counter of Instances of Train, Route and Station
 module InstanceCounter
   def self.included(base)
