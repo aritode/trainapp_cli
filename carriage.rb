@@ -10,6 +10,8 @@ class Carriage
 
   attr_reader :volume_max, :volume_taken
 
+  validate :number, :presence
+
   def initialize(number, volume_max)
     @number = number
     @volume_max   = volume_max
@@ -27,11 +29,5 @@ class Carriage
 
   def to_s
     "Carriage № #{@number}, type: #{self.class}"
-  end
-
-  protected
-
-  def validate!
-    raise 'Carriage number can\'t be empty' if @number.empty?
   end
 end

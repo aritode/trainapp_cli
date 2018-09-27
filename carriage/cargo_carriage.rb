@@ -2,6 +2,8 @@
 
 # Cargo Carriage
 class CargoCarriage < Carriage
+  validate :number, :presence
+
   def initialize(number, volume_max)
     super(number, volume_max)
   end
@@ -14,5 +16,6 @@ class CargoCarriage < Carriage
 
   def validate!
     raise 'Maximum Volume must be greater than 0' if volume_max.zero?
+    super
   end
 end
