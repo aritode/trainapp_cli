@@ -162,17 +162,15 @@ class MainMenu
                                   @routes)
 
     user_route = @routes[user_input_route - 1]
-    user_input = ask_choose('', '', custom_route_manage_options)
+    user_input = ask_choose('', '', CUSTOM_ROUTE_MANAGE_OPTIONS)
 
     action_manage_stations_in_route_core(user_input, user_route)
   end
 
-  def custom_route_manage_options
-    ['Add station',
-     'Remove station',
-     'No, let\'s go Back',
-     'No, let\'s go to Main Menu']
-  end
+  CUSTOM_ROUTE_MANAGE_OPTIONS = ['Add station',
+                                 'Remove station',
+                                 'No, let\'s go Back',
+                                 'No, let\'s go to Main Menu'].freeze
 
   def action_manage_stations_in_route_core(user_input, user_route)
     case user_input
