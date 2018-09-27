@@ -7,6 +7,8 @@ class PassengerCarriage < Carriage
 
   alias seats_available available_volume
 
+  validate :number, :presence
+
   def initialize(number, total_seats)
     super(number, total_seats)
   end
@@ -25,5 +27,6 @@ class PassengerCarriage < Carriage
 
   def validate!
     raise 'Maximum number of Seats must be greater than 0' if total_seats.zero?
+    super
   end
 end

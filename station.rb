@@ -9,6 +9,8 @@ class Station
   include Validation
   attr_reader :name, :trains
 
+  validate :name, :presence
+
   @@stations = []
 
   def self.all
@@ -46,9 +48,9 @@ class Station
   private
 
   def validate!
-    raise 'Station name can\'t be empty' if @name.empty?
-
     message = "Station #{name} is already in Stations"
     raise message if Station.all.any? { |item| item.name.casecmp(@name).zero? }
+
+    super
   end
 end

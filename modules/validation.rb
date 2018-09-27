@@ -38,15 +38,13 @@ module Validation
     protected
 
     def validate_presence(attr_name, attr_value, _option)
-      if attr_value.to_s.empty?
-        raise "#{self.class} @#{attr_name} can't be empty"
-      end
+      raise "#{self.class} #{attr_name} can't be empty" if attr_value.to_s.empty?
     end
 
     def validate_format(attr_name, attr_value, format)
-      if attr_value !~ format
-        raise "#{self.class} must be with correct @#{attr_name} format: #{format}"
-      end
+      message = "#{self.class} #{attr_name} must be in correct format: ###-## or ##### \
+                 \nfull format in regex: #{format}"
+      raise message unless attr_value&.match?(format)
     end
 
     def validate_type(attr_name, attr_name_value, type)

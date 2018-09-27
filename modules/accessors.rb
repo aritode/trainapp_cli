@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Accessors
   def attr_accessors_with_history(*args)
     args.each do |attr_name|

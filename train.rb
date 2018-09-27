@@ -3,15 +3,24 @@
 require_relative 'modules/manufacturer_name'
 require_relative 'modules/instance_counter'
 require_relative 'modules/validation'
+require_relative 'modules/accessors'
 
 # Train
 class Train
   include ManufacturerName
   include InstanceCounter
   include Validation
-  attr_reader :speed, :number, :carriages, :type, :route
+  extend Accessors
+
+  attr_reader :carriages, :type, :route
+
+  strong_attr_accessor :number, String
+  attr_accessors_with_history :speed
 
   NUMBER_FORMAT = /\A[A-Z|0-9]{3}-?[A-Z|0-9]{2}\z/i
+
+  validate :number, :presence
+  validate :number, :format, NUMBER_FORMAT
 
   @@trains = {}
 
@@ -84,15 +93,12 @@ class Train
   protected
 
   def validate!
-    raise 'Train number can\'t be empty' if @number.empty?
-
-    message = 'Train number must be in correct format: ###-## or #####'
-    raise message unless NUMBER_FORMAT.match?(@number)
-
     raise "Train with №:#{@number} is already exist!" unless Train.find(@number).nil?
 
     message = 'Train must be correct type: cargo or passenger'
     raise message unless %i[cargo passenger].include?(@type)
+
+    super
   end
 
   private
